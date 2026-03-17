@@ -1,0 +1,15 @@
+node_modules/
+dist/
+build/
+.next/
+
+.env
+.env.*
+
+.vscode/
+.DS_Store
+
+# data ใหญ่ (ถ้ามี)
+data/
+*.csv
+*.json

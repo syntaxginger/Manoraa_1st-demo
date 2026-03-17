@@ -1,0 +1,64 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+:root {
+  /* โทนสีเดิมที่ดูคลีนและเป็นมืออาชีพ */
+  --slate-900: #0f172a; /* สีดำหลัก */
+  --slate-500: #64748b; /* สีเทารอง */
+  --science-blue: #3b82f6; /* สีน้ำเงินสำหรับจุดเน้น (Accent) */
+  --bg-slate-100: #f1f5f9; /* สีพื้นหลังแบบนุ่ม */
+}
+
+body {
+  @apply bg-[#f1f5f9] text-slate-800 antialiased;
+}
+  /* ปรับแต่งการเลือกข้อความให้ดูพรีเมียม */
+  ::selection {
+    @apply bg-slate-900 text-white;
+  }
+}
+
+@layer components {
+  /* 2. สร้าง Class สำหรับปุ่มที่เป็นสี Logo ไว้ใช้ทั่วเว็บ */
+  .btn-bronze {
+    @apply bg-[#b19485] hover:bg-[#967d6f] text-white transition-all shadow-md active:scale-95;
+  }
+  
+  /* 3. สร้าง Class สำหรับ Text ที่เป็นสี Logo */
+  .text-bronze {
+    color: #b19485;
+  }
+  /* Scrollbar แบบ Minimal สำหรับงานวิจัย */
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track {
+    @apply bg-transparent;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    @apply bg-slate-200 rounded-full hover:bg-slate-300 transition-colors;
+  }
+}
+
+/* --- Animations สำหรับความต่อเนื่อง --- */
+
+/* Spin แบบจางๆ สำหรับโมเดล 3D ใน Clean Room */
+@keyframes spin-slow {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+.animate-spin-slow {
+  animation: spin-slow 25s linear infinite;
+  @apply opacity-40; /* ลดความเข้มของเส้นลงเพื่อให้ดูสะอาด */
+}
+
+/* ปรับการ Transition ระหว่างหน้าให้ลื่นไหล */
+.fade-enter {
+  opacity: 0;
+}
+.fade-enter-active {
+  opacity: 1;
+  transition: opacity 300ms ease-in;
+}
