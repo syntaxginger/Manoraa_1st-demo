@@ -1,24 +1,24 @@
 import React, { useState } from 'react';
 import {
-  Zap, CheckSquare, Square, Info,
-  Database, Activity, ChevronDown, FileText,
-  Layers, Orbit, Minimize2, Maximize2
+  Zap, CheckSquare, Square, Database, Activity, 
+  ChevronDown, FileText, Layers, Orbit, 
+  Minimize2, Maximize2, Sigma
 } from 'lucide-react';
 
 const DeepDiveWorkbench = () => {
   const pdbData = {
     "1NVR": { uniprot: "O14757", target: "CHK1_HUMAN", affinity: "0.0078", interactions: [
-        { id: 'HB1', type: 'HBOND', label: '[CYS]87:A', color: 'text-cyan-500', bg: 'bg-cyan-500' },
-        { id: 'HB2', type: 'HBOND', label: '[GLU]134:A', color: 'text-cyan-500', bg: 'bg-cyan-500' },
-        { id: 'VD1', type: 'VDW', label: '[CYS]87:A', color: 'text-amber-500', bg: 'bg-amber-500' }
+        { id: 'HB1', type: 'HBOND', label: '[CYS]87:A', dist: '2.84', color: 'text-cyan-500', bg: 'bg-cyan-500' },
+        { id: 'HB2', type: 'HBOND', label: '[GLU]134:A', dist: '3.12', color: 'text-cyan-500', bg: 'bg-cyan-500' },
+        { id: 'VD1', type: 'VDW', label: '[CYS]87:A', dist: '3.85', color: 'text-amber-500', bg: 'bg-amber-500' }
       ]},
     "10KY": { uniprot: "O15530", target: "PDPK1_HUMAN", affinity: "0.0065", interactions: [
-        { id: 'HB1', type: 'HBOND', label: '[ALA]162:A', color: 'text-cyan-400', bg: 'bg-cyan-400' },
-        { id: 'VD1', type: 'VDW', label: '[ALA]162:A', color: 'text-yellow-400', bg: 'bg-yellow-400' }
+        { id: 'HB1', type: 'HBOND', label: '[ALA]162:A', dist: '2.95', color: 'text-cyan-400', bg: 'bg-cyan-400' },
+        { id: 'VD1', type: 'VDW', label: '[ALA]162:A', dist: '4.10', color: 'text-yellow-400', bg: 'bg-yellow-400' }
       ]},
     "1XJD": { uniprot: "Q04759", target: "KPCT_HUMAN", affinity: "0.00033", interactions: [
-        { id: 'HB1', type: 'HBOND', label: '[ASP]508:A', color: 'text-cyan-400', bg: 'bg-cyan-400' },
-        { id: 'VD1', type: 'VDW', label: '[ALA]407:A', color: 'text-yellow-400', bg: 'bg-yellow-400' }
+        { id: 'HB1', type: 'HBOND', label: '[ASP]508:A', dist: '2.78', color: 'text-cyan-400', bg: 'bg-cyan-400' },
+        { id: 'VD1', type: 'VDW', label: '[ALA]407:A', dist: '3.92', color: 'text-yellow-400', bg: 'bg-yellow-400' }
       ]}
   };
 
@@ -38,7 +38,7 @@ const DeepDiveWorkbench = () => {
 
   return (
     <div className="h-screen bg-[#F1F5F9] flex flex-col font-sans overflow-hidden text-slate-700 text-[14px]">
-      {/* --- SLIM NAV --- */}
+      {/* --- TOP NAV --- */}
       <nav className="bg-white border-b border-slate-200 px-8 py-3 z-50 flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-6">
           <div className="flex items-center gap-3">
@@ -80,7 +80,7 @@ const DeepDiveWorkbench = () => {
             <div className="absolute top-6 left-1/2 -translate-x-1/2 z-30 w-[92%] bg-slate-900/85 backdrop-blur-xl rounded-2xl px-8 py-4 border border-white/10 shadow-2xl">
               <p className="text-[9px] font-black text-blue-400 uppercase tracking-[0.3em] mb-1.5 opacity-80">Influential Distance Equation</p>
               <code className="text-[13px] text-blue-50 font-mono tracking-wider block">
-                Log10Ki = -10.9961 + <span className="text-blue-400 font-black">0.2155xD(B18,B22)</span> + 0.1799xD(B3,B6) + 0.1481xD(B4,B6) + 0.1120xD(B7,B10)
+                Log10Ki = -10.9961 + <span className="text-blue-400 font-black">0.2155xD(B18,B22)</span> + 0.1799xD(B3,B6) + 0.1481xD(B4,B6)
               </code>
             </div>
           )}
@@ -89,69 +89,93 @@ const DeepDiveWorkbench = () => {
             <source src={`vdo/${selectedPdb}_${mainMode}.mp4`} type="video/mp4" />
           </video>
 
-          {/* INTEGRATED TOOLS (แนวตั้ง) */}
+          {/* INTEGRATED TOOLS */}
           {mainMode === 'drug-design' && (
             <div className="absolute bottom-24 left-8 z-40 flex flex-col gap-2.5 p-2.5 bg-white/10 backdrop-blur-md rounded-2xl border border-white/10 shadow-lg">
               {[Layers, Orbit, Minimize2, Maximize2].map((Icon, i) => (
-                <button key={i} className="w-10 h-10 bg-white/90 rounded-xl flex items-center justify-center text-slate-600 hover:text-blue-600 hover:bg-white transition-all shadow-sm group relative">
+                <button key={i} className="w-10 h-10 bg-white/90 rounded-xl flex items-center justify-center text-slate-600 hover:text-blue-600 hover:bg-white transition-all shadow-sm">
                   <Icon size={18} />
                 </button>
               ))}
             </div>
           )}
-
         </main>
 
-        {/* --- OPTIMIZED SIDEBAR --- */}
-        <aside className="w-[300px] xl:w-[320px] flex flex-col gap-4 z-40">
-          <div className="bg-white/80 backdrop-blur-xl border border-slate-200 rounded-[1.5rem] p-5 shadow-sm">
-            <p className="text-[9px] font-black text-slate-400 uppercase tracking-widest mb-4 italic">Target Info</p>
-            <div className="space-y-4">
-              <div className="flex justify-between items-center">
-                <span className="text-[9px] text-slate-400 uppercase font-black">UniProt</span>
-                <span className="text-[12px] font-black text-slate-900">{currentData.uniprot}</span>
+        {/* --- SIDEBAR --- */}
+        <aside className="w-[310px] xl:w-[350px] flex flex-col gap-4 z-40">
+          
+          {/* ส่วนสรุปค่า On-the-fly (Compact Version) */}
+          <div className="bg-slate-900 text-white rounded-[1.5rem] p-4 shadow-xl border border-slate-800 relative overflow-hidden">
+            <div className="flex items-center justify-between mb-3">
+              <div className="flex items-center gap-2">
+                <Sigma size={14} className="text-blue-400" />
+                <h3 className="text-[9px] font-black uppercase tracking-[0.2em] text-blue-100/50">Summary</h3>
               </div>
-              <div className="flex justify-between items-center">
-                <span className="text-[9px] text-slate-400 uppercase font-black">Affinity</span>
-                <span className="text-[12px] font-black text-blue-600">{currentData.affinity}</span>
+              <div className="flex gap-1 items-center">
+                <div className="w-1 h-1 bg-blue-500 rounded-full animate-pulse"></div>
+                <span className="text-[8px] font-black text-slate-500 uppercase">Live</span>
               </div>
-              <div className="border-t border-slate-100 pt-3">
-                <p className="text-[9px] text-slate-400 uppercase font-black mb-1">Target Name</p>
-                <p className="text-[12px] font-black text-slate-800 leading-tight">{currentData.target}</p>
+            </div>
+            
+            <div className="flex items-center justify-between bg-slate-800/50 rounded-xl px-4 py-3 border border-white/5">
+              <p className="text-[8px] text-slate-400 uppercase font-black tracking-widest leading-none">Predicted Ki</p>
+              <div className="flex items-baseline gap-1.5 leading-none">
+                <span className="text-xl font-mono font-black text-blue-400">
+                  {currentData.affinity}
+                </span>
+                <span className="text-[9px] font-black text-slate-500 uppercase">nM</span>
               </div>
             </div>
           </div>
 
+          {/* รายการ Interaction พร้อม Checkbox */}
           <div className="flex-1 bg-white border border-slate-200 rounded-[1.5rem] p-5 flex flex-col overflow-hidden shadow-sm">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-900">Interactions</h3>
               <span className="bg-blue-50 text-[10px] px-2.5 py-0.5 rounded-full font-black text-blue-600">{currentData.interactions.length}</span>
             </div>
 
-            <div className="flex-1 overflow-y-auto space-y-2.5 pr-1">
+            <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scrollbar">
               {currentData.interactions.map(item => (
-                <button key={item.id} onClick={() => toggleInteraction(item.id)} className={`w-full text-left p-3.5 rounded-2xl border-2 transition-all flex items-center justify-between ${activeInteractions.includes(item.id) ? 'bg-blue-50/50 border-blue-500 shadow-sm shadow-blue-50' : 'bg-slate-50 border-transparent hover:border-slate-200'}`}>
+                <button 
+                  key={item.id} 
+                  onClick={() => toggleInteraction(item.id)} 
+                  className={`w-full text-left p-3.5 rounded-2xl border-2 transition-all flex items-center justify-between group ${
+                    activeInteractions.includes(item.id) 
+                    ? 'bg-blue-50/50 border-blue-500 shadow-sm' 
+                    : 'bg-slate-50 border-transparent hover:border-slate-200'
+                  }`}
+                >
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5 mb-1">
-                      <div className={`w-1.5 h-1.5 rounded-full ${item.bg}`} />
-                      <span className={`text-[9px] font-black uppercase ${item.color}`}>{item.type}</span>
+                      <div className={`w-1.5 h-1.5 rounded-full ${item.bg} ${activeInteractions.includes(item.id) ? 'animate-pulse' : ''}`} />
+                      <span className={`text-[9px] font-black uppercase tracking-tight ${item.color}`}>{item.type}</span>
                     </div>
-                    <p className="text-[11px] font-mono font-black text-slate-700 uppercase truncate">{item.label}</p>
+                    <div className="flex justify-between items-center pr-2">
+                      <p className="text-[11px] font-mono font-black text-slate-700 uppercase truncate">{item.label}</p>
+                      <span className="text-[10px] font-black text-slate-400 bg-white px-1.5 py-0.5 rounded border border-slate-100 shadow-sm">{item.dist} Å</span>
+                    </div>
                   </div>
-                  {activeInteractions.includes(item.id) ? <CheckSquare size={18} className="text-blue-600 ml-2" /> : <Square size={18} className="text-slate-200 ml-2" />}
+                  <div className="ml-2.5">
+                    {activeInteractions.includes(item.id) ? (
+                      <CheckSquare size={20} className="text-blue-600" />
+                    ) : (
+                      <Square size={20} className="text-slate-200 group-hover:text-slate-300 transition-colors" />
+                    )}
+                  </div>
                 </button>
               ))}
             </div>
             
-            <button className="mt-4 w-full py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.25em] flex items-center justify-center gap-2 hover:bg-blue-600 transition-all shadow-lg shadow-slate-200">
-              <FileText size={15} /> Export
+            <button className="mt-4 w-full py-3 bg-slate-900 text-white rounded-2xl text-[10px] font-black uppercase tracking-[0.25em] flex items-center justify-center gap-2 hover:bg-blue-600 transition-all shadow-lg">
+              <FileText size={15} /> Export Report
             </button>
           </div>
         </aside>
 
-        {/* --- BOTTOM DRAWER (ปรับขยับลงมา 30% และแก้ปุ่มสีเทา) --- */}
+        {/* --- BOTTOM DRAWER --- */}
         {mainMode === 'drug-design' && (
-          <div className={`absolute bottom-4 left-8 right-[320px] xl:right-[340px] bg-amber-50/95 backdrop-blur-xl border border-amber-200/50 z-[55] rounded-3xl transition-all duration-500 shadow-2xl overflow-hidden ${isDrawerOpen ? 'h-[300px]' : 'h-11'}`}>
+          <div className={`absolute bottom-4 left-8 right-[320px] xl:right-[360px] bg-amber-50/95 backdrop-blur-xl border border-amber-200/50 z-[55] rounded-3xl transition-all duration-500 shadow-2xl overflow-hidden ${isDrawerOpen ? 'h-[300px]' : 'h-11'}`}>
             <button onClick={() => setIsDrawerOpen(!isDrawerOpen)} className="w-full h-11 flex items-center justify-between px-7">
               <span className="text-[10px] font-black text-amber-900/60 uppercase tracking-[0.2em] flex items-center gap-3">
                 <Database size={15} /> Residue Mapping Index (B1 - B12)
@@ -169,7 +193,7 @@ const DeepDiveWorkbench = () => {
                   </thead>
                   <tbody className="text-slate-700 font-bold">
                     {['*1NVR', '10KY', '1XJD'].map(pdb => (
-                      <tr key={pdb} className="border-b border-amber-50/50 hover:bg-amber-50/50">
+                      <tr key={pdb} className="border-b border-amber-50/50 hover:bg-amber-50/50 transition-colors">
                         <td className="py-3.5 px-5 font-black text-slate-900">{pdb}</td>
                         {Array.from({ length: 6 }).map((_, i) => <td key={i} className={`px-2 py-3.5 ${i === 4 ? 'text-blue-600' : ''}`}>ALA-26</td>)}
                       </tr>
