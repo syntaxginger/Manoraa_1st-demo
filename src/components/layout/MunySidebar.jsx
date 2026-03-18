@@ -42,7 +42,6 @@ actions: [
     lab: {
       greeting: "You are in the 3D Visualization environment. You can measure interatomic distances or inspect binding forces in real-time.",
       actions: [
-        { label: "Recalculate", icon: <Activity size={16} />, path: "/lab" },
         { label: "Export Data", icon: <FileText size={16} />, path: "/report" },
         { label: "Back to Home", icon: <Search size={16} />, path: "/" }
       ]
