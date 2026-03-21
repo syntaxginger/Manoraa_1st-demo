@@ -1,11 +1,11 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
-  MessageSquare, ChevronRight, Sparkles, ArrowLeft, PlayCircle, 
-  BookOpen, Settings, RotateCcw, FileText, Search, LayoutDashboard, Send
+  MessageSquare, Sparkles, Search, LayoutDashboard, Beaker, Send, 
+  BookOpen, Zap, BarChart2, MousePointer2, FileText, ArrowRight
 } from 'lucide-react';
 
-const MunySidebar = ({ currentAffinity, interactions, currentPage }) => {
+const MunySidebar = ({ currentPage }) => {
   const navigate = useNavigate();
   const [messages, setMessages] = useState([]);
   const [currentOptions, setCurrentOptions] = useState([]);
@@ -21,136 +21,196 @@ const MunySidebar = ({ currentAffinity, interactions, currentPage }) => {
     scrollToBottom();
   }, [messages, isThinking]);
 
-  // --- 1. CONFIG: Contextual Messages & Suggested Chips ---
-  const pageConfigs = {
+  // --- 1. CONFIG: Interactive Dialog Flow ---
+  const flowLogic = {
     search: {
-      welcome: "Welcome to MANORAA. I'm Muny, your AI research assistant. How can I help you today?",
+      welcome: "Hello! I'm Muny. Ready to find some molecules? You can start by entering a PDB ID or SMILES string.",
       options: [
-        { label: "Search Guide", action: "guide_info", icon: <Search size={14}/> },
-        { label: "Database Sources", action: "db_info", icon: <BookOpen size={14}/> },
-        { label: "Go to Dashboard", action: "/dashboard", icon: <LayoutDashboard size={14}/>, isReal: true }
+        { label: "How to use Search?", action: "guide_step_1", icon: <Search size={12}/> },
+        { label: "Data Sources", action: "source_info", icon: <BookOpen size={12}/> }
       ]
     },
     dashboard: {
-      welcome: "Insight Dashboard loaded. I've analyzed the structural clusters and binding trends.",
+      welcome: "Insight Dashboard loaded. I've clustered the results based on binding affinity trends. What would you like to explore?",
       options: [
-        { label: "What is this score?", action: "score_info" },
-        { label: "Deep-Dive in 3D Lab", action: "/lab", icon: <PlayCircle size={14}/>, isReal: true }
+        { label: "Explain Affinity Score", action: "score_info", icon: <Zap size={12}/> },
+        { label: "View Cluster Details", action: "cluster_info", icon: <BarChart2 size={12}/> }
       ]
     },
     lab: {
-      welcome: "3D Lab active. I'm ready to calculate real-time binding affinity and forces.",
+      welcome: "3D Lab active. I can help you measure distances and analyze molecular interactions in real-time.",
       options: [
-        { label: "How to interact?", action: "lab_info" },
-        { label: "View Report", action: "/report", icon: <FileText size={14}/>, isReal: true }
+        { label: "How to measure?", action: "measure_info", icon: <MousePointer2 size={12}/> },
+        { label: "Check H-Bonding", action: "hbond_info", icon: <Beaker size={12}/> }
+      ]
+    },
+    report: {
+      welcome: "Detailed Analysis Report. I've summarized the key interactions and stability metrics for your selected ligand.",
+      options: [
+        { label: "Summarize Findings", action: "report_summary", icon: <FileText size={12}/> },
+        { label: "Check Solubility (LogP)", action: "logp_info", icon: <Zap size={12}/> }
+      ]
+    },
+    // --- Dashboard Interaction Flow (New) ---
+    score_info: {
+      content: "The LogKi score represents the binding affinity. Higher absolute values mean stronger binding. Would you like to see how we validate these scores?",
+      options: [
+        { label: "Yes, show validation", action: "validation_info" },
+        { label: "Back to Dashboard", action: "dashboard" }
+      ]
+    },
+    validation_info: {
+      content: "We validate our scores against the PDBbind refined set, achieving high correlation (R² > 0.7) for most kinase families.",
+      options: [
+        { label: "Go to 3D Lab", action: "/lab" },
+        { label: "Back", action: "score_info" }
+      ]
+    },
+    cluster_info: {
+      content: "Molecules are clustered by structural similarity (Tanimoto coefficient). This helps identify common binding scaffolds.",
+      options: [
+        { label: "Show most active cluster", action: "active_cluster" },
+        { label: "Back", action: "dashboard" }
+      ]
+    },
+    active_cluster: {
+      content: "Cluster #4 contains the highest affinity fragments. It might be a good starting point for lead optimization.",
+      options: [
+        { label: "See Report", action: "/report" },
+        { label: "Back", action: "cluster_info" }
+      ]
+    },
+    // --- Report Interaction Flow (New) ---
+    report_summary: {
+      content: "The ligand shows strong hydrophobic interactions with Phe153. However, the torsion strain is slightly high. Should I suggest improvements?",
+      options: [
+        { label: "Suggest improvements", action: "improve_ligand" },
+        { label: "Back to Report", action: "report" }
+      ]
+    },
+    improve_ligand: {
+      content: "Adding a hydroxyl group at the C4 position might stabilize the binding through an extra H-bond with Asp120.",
+      options: [
+        { label: "Try in 3D Lab", action: "/lab" },
+        { label: "Back", action: "report_summary" }
+      ]
+    },
+    logp_info: {
+      content: "The calculated LogP is 2.4, which is within the ideal range for Lipinski's Rule of Five (Oral Bioavailability).",
+      options: [
+        { label: "Check Molecular Weight", action: "mw_info" },
+        { label: "Back", action: "report" }
+      ]
+    },
+    // --- Base Flows ---
+    guide_step_1: {
+      content: "Simply type a PDB ID (like 1STP). Would you like to see how our hierarchical data works?",
+      options: [
+        { label: "Yes, explain levels", action: "source_info" },
+        { label: "Go to 3D Lab", action: "/lab" }
+      ]
+    },
+    source_info: {
+      content: "We fetch data from PDB & ChEMBL and process it 'On-the-fly' to ensure you get the most updated results.",
+      options: [
+        { label: "What is On-the-fly?", action: "otf_info" },
+        { label: "Back to Search", action: "search" }
+      ]
+    },
+    otf_info: {
+      content: "It means we don't store static results. We calculate everything (distances, scores) the moment you click!",
+      options: [
+        { label: "Back", action: "source_info" }
+      ]
+    },
+    measure_info: {
+      content: "Use the Ruler Tool. If the distance is under 3.5Å, it likely suggests a meaningful interaction.",
+      options: [
+        { label: "Explain 3.5Å significance", action: "distance_logic" },
+        { label: "Back", action: "lab" }
       ]
     }
   };
 
-  const config = pageConfigs[currentPage] || pageConfigs.search;
-
   useEffect(() => {
-    setMessages([{ role: 'ai', content: config.welcome }]);
-    setCurrentOptions(config.options);
+    const node = flowLogic[currentPage] || flowLogic.search;
+    setMessages([{ role: 'ai', content: node.welcome || node.content }]);
+    setCurrentOptions(node.options);
   }, [currentPage]);
 
-  // --- 2. LOGIC: Interaction Responses (Hard-coded) ---
-  const getResponse = (queryText, action = null) => {
-    const query = queryText.toLowerCase().trim();
-    
-    // Check by Action (from Selection Menu)
-    if (action === "guide_info") return "To start, enter a PDB ID or SMILES string in the search bar. I will then perform a hierarchical analysis of the molecular structures.";
-    if (action === "db_info") return "MANORAA integrates high-quality data from UniProt, PDB, and ChEMBL to ensure precise binding affinity predictions.";
-    if (action === "score_info") return "The LogKi score is calculated using our validated regression models, considering interatomic distances and atom types.";
-    if (action === "lab_info") return "In the 3D Lab, you can use the Ruler tool to measure atomic distances. These values directly influence the affinity prediction.";
-    
-    // Navigation Responses
-    if (action?.startsWith('/')) return `Acknowledged. Redirecting you to the ${action.replace('/', '')} module...`;
+  const handleFlow = (option) => {
+    if (isThinking) return;
+    setMessages(prev => [...prev, { role: 'user', content: option.label }]);
+    setIsThinking(true);
 
-    // Check by Text Input (Manual Typing)
-    if (query.includes("what is stu")) return "STU (Staurosporine) is a potent alkaloid and kinase inhibitor used as a reference ligand in this analysis.";
-    if (query.includes("purpose") || query.includes("web") || query.includes("manoraa")) return "MANORAA is a specialized platform for protein-ligand interaction analysis and binding affinity prediction.";
-
-    return "I'm sorry, this free-text feature is not yet available in the Demo version. Please use the suggested chips above for guidance.";
+    setTimeout(() => {
+      setIsThinking(false);
+      if (option.action.startsWith('/')) {
+        setMessages(prev => [...prev, { role: 'ai', content: `Navigating to ${option.action.replace('/', '')}...` }]);
+        setTimeout(() => navigate(option.action), 800);
+        return;
+      }
+      const nextNode = flowLogic[option.action];
+      if (nextNode) {
+        setMessages(prev => [...prev, { role: 'ai', content: nextNode.content || nextNode.welcome }]);
+        setCurrentOptions(nextNode.options);
+      }
+    }, 800);
   };
 
-  // --- 3. HANDLERS ---
-  const handleSendMessage = (e) => {
+  const handleManualSend = (e) => {
     e.preventDefault();
-    if (!inputValue.trim() || isThinking) return;
-
-    const userText = inputValue;
-    setMessages(prev => [...prev, { role: 'user', content: userText }]);
+    const query = inputValue.toLowerCase().trim();
+    if (!query) return;
+    setMessages(prev => [...prev, { role: 'user', content: inputValue }]);
     setInputValue("");
     setIsThinking(true);
 
     setTimeout(() => {
       setIsThinking(false);
-      const aiResponse = getResponse(userText);
-      setMessages(prev => [...prev, { role: 'ai', content: aiResponse }]);
-    }, 1000);
-  };
-
-  const handleSelection = (option) => {
-    if (isThinking) return;
-    
-    // 1. Show User's Selection in Chat
-    setMessages(prev => [...prev, { role: 'user', content: option.label }]);
-    setIsThinking(true); 
-
-    // 2. Process Response
-    setTimeout(() => {
-      setIsThinking(false);
-      const aiResponse = getResponse(option.label, option.action);
-      setMessages(prev => [...prev, { role: 'ai', content: aiResponse }]);
-
-      // 3. If it's a Navigation Action, wait a bit then navigate
-      if (option.action?.startsWith('/')) {
-        setTimeout(() => {
-          navigate(option.action);
-        }, 1200);
-      }
+      let response = "I'm here to help with MANORAA tools. Try using the suggested buttons for the best experience!";
+      if (query.includes("what is manoraa")) response = "MANORAA is a platform for analyzing protein-ligand interactions and predicting binding affinity.";
+      else if (query.includes("who is this for")) response = "It's for researchers and students focused on drug design and bioinformatics.";
+      else if (query.includes("how to calculate affinity")) response = "Affinity is predicted using our On-the-fly regression models based on interatomic distances.";
+      else if (query.includes("distance 2.5")) response = "2.5Å indicates a very strong Hydrogen Bond, which is key for stable binding.";
+      else if (query.includes("explain stu")) response = "STU (Staurosporine) is a common kinase inhibitor used here as a reference ligand.";
+      setMessages(prev => [...prev, { role: 'ai', content: response }]);
     }, 1000);
   };
 
   return (
-    <div className="flex flex-col h-full bg-white font-sans border-l border-slate-200 shadow-2xl overflow-hidden">
+    <div className="flex flex-col h-full bg-white font-sans border-l border-slate-200 shadow-xl overflow-hidden">
       {/* Header */}
-      <div className="p-5 border-b border-slate-100 flex items-center justify-between bg-white shrink-0">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-[#0F172A] rounded-lg flex items-center justify-center text-white relative shadow-sm">
-            <MessageSquare size={18} />
-            <div className="absolute -bottom-1 -right-1 w-3 h-3 bg-green-400 border-2 border-white rounded-full animate-pulse"></div>
-          </div>
-          <div>
-            <h4 className="text-[12px] font-black text-slate-800 uppercase tracking-tight">Muny Assistant</h4>
-            <p className="text-[9px] text-slate-400 font-black uppercase tracking-[0.2em]">{currentPage || 'Home'} NODE</p>
-          </div>
+      <div className="p-4 border-b border-slate-50 flex items-center gap-3 shrink-0">
+        <div className="w-8 h-8 bg-[#0F172A] rounded-full flex items-center justify-center text-white">
+          <Sparkles size={16} />
+        </div>
+        <div>
+          <h4 className="text-sm font-bold text-slate-800">Muny Assistant</h4>
+          <p className="text-[10px] text-indigo-500 font-bold uppercase tracking-wider">{currentPage} Mode</p>
         </div>
       </div>
 
       {/* Chat Area */}
-      <div className="flex-1 p-5 overflow-y-auto space-y-5 bg-[#F8FAFC]">
+      <div className="flex-1 p-4 overflow-y-auto space-y-4 bg-[#F8FAFC]">
         {messages.map((msg, idx) => (
-          <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} animate-in fade-in slide-in-from-bottom-2`}>
-            <div className={`max-w-[90%] p-4 rounded-lg text-[12px] shadow-sm leading-relaxed ${
+          <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
+            <div className={`max-w-[85%] px-4 py-3 rounded-2xl text-[13px] leading-snug shadow-sm ${
               msg.role === 'user' 
-              ? 'bg-[#0F172A] text-white rounded-tr-none font-bold' 
-              : 'bg-white text-slate-600 border border-slate-200 rounded-tl-none font-medium'
+              ? 'bg-[#0F172A] text-white rounded-tr-none font-medium' 
+              : 'bg-white text-slate-700 border border-slate-100 rounded-tl-none'
             }`}>
               {msg.content}
             </div>
           </div>
         ))}
-
         {isThinking && (
-          <div className="flex justify-start animate-in fade-in">
-            <div className="bg-white border border-slate-100 px-4 py-3 rounded-lg rounded-tl-none flex gap-2 items-center shadow-sm">
-              <span className="text-slate-400 text-[9px] font-black uppercase tracking-widest animate-pulse">Thinking</span>
-              <div className="flex gap-1">
-                <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce"></div>
-                <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce [animation-delay:0.2s]"></div>
-                <div className="w-1 h-1 bg-slate-400 rounded-full animate-bounce [animation-delay:0.4s]"></div>
+          <div className="flex justify-start">
+            <div className="bg-white border border-slate-100 px-4 py-2 rounded-2xl rounded-tl-none flex items-center gap-2">
+               <div className="flex gap-1">
+                <div className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce"></div>
+                <div className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:0.2s]"></div>
+                <div className="w-1.5 h-1.5 bg-slate-300 rounded-full animate-bounce [animation-delay:0.4s]"></div>
               </div>
             </div>
           </div>
@@ -158,39 +218,52 @@ const MunySidebar = ({ currentAffinity, interactions, currentPage }) => {
         <div ref={chatEndRef} />
       </div>
 
-      {/* Input & Footer */}
-      <div className="p-5 border-t border-slate-100 bg-white space-y-4">
-        
-        {/* Suggested Chips */}
-        {!isThinking && (
-          <div className="flex flex-wrap gap-2">
-            {currentOptions.map((opt, i) => (
-              <button key={i} onClick={() => handleSelection(opt)}
-                className="flex items-center gap-2 px-3 py-1.5 rounded-md text-[9px] font-black uppercase border border-slate-200 bg-white text-slate-500 hover:border-indigo-500 hover:text-indigo-600 transition-all shadow-sm">
+      {/* Footer Area */}
+      <div className="p-4 bg-white border-t border-slate-100 space-y-4">
+        <div className="flex flex-wrap gap-2">
+          {!isThinking && currentOptions.map((opt, i) => (
+            <button key={i} onClick={() => handleFlow(opt)}
+              className="px-4 py-1.5 rounded-full border border-slate-200 text-[11px] font-bold text-slate-600 hover:bg-indigo-50 hover:border-indigo-300 hover:text-indigo-600 transition-all shadow-sm bg-white"
+            >
+              <span className="flex items-center gap-2">
                 {opt.icon} {opt.label}
-              </button>
-            ))}
-          </div>
-        )}
+              </span>
+            </button>
+          ))}
+        </div>
 
-        {/* Text Input */}
-        <form onSubmit={handleSendMessage} className="relative flex items-center">
+        <form onSubmit={handleManualSend} className="relative">
           <input 
             type="text" 
             value={inputValue}
             onChange={(e) => setInputValue(e.target.value)}
-            placeholder="Ask Muny a question..."
-            className="w-full bg-slate-50 border border-slate-200 rounded-lg pl-4 pr-12 py-3 text-[12px] font-bold text-slate-700 tracking-tight focus:outline-none focus:border-[#0F172A] transition-all placeholder:text-slate-400 placeholder:font-medium placeholder:normal-case"
+            placeholder="Ask Muny..."
+            className="w-full bg-slate-50 border border-slate-200 rounded-full pl-5 pr-12 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-100 transition-all"
           />
-          <button type="submit" className="absolute right-2 p-2 bg-[#0F172A] text-white rounded-md hover:bg-indigo-600 transition-colors">
-            <Send size={14} />
+          <button type="submit" className="absolute right-2 top-1.5 p-2 bg-[#0F172A] text-white rounded-full hover:bg-black transition-colors">
+            <Send size={16} />
           </button>
         </form>
 
-        {/* Home Button */}
-        <button onClick={() => navigate('/')} className="w-full flex items-center justify-center gap-2 py-3 rounded-lg border border-slate-200 text-[9px] font-black text-slate-400 uppercase tracking-widest hover:bg-slate-50 transition-all">
-            <ArrowLeft size={12} /> Search
-        </button>
+        {/* Navigation Shortcuts - Fixed & Added Report */}
+        <div className="grid grid-cols-4 gap-1 pt-2 border-t border-slate-50">
+           <button onClick={() => navigate('/')} className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-slate-50 transition-colors">
+              <Search size={14} className="text-slate-400" />
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Search</span>
+           </button>
+           <button onClick={() => navigate('/dashboard')} className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-slate-50 transition-colors">
+              <LayoutDashboard size={14} className="text-slate-400" />
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Dash</span>
+           </button>
+           <button onClick={() => navigate('/lab')} className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-slate-50 transition-colors">
+              <Beaker size={14} className="text-slate-400" />
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">3D Lab</span>
+           </button>
+           <button onClick={() => navigate('/report')} className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-slate-50 transition-colors">
+              <FileText size={14} className="text-slate-400" />
+              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Report</span>
+           </button>
+        </div>
       </div>
     </div>
   );

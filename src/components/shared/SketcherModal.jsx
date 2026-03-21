@@ -1,155 +1,156 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { X, Save, RotateCcw, PenTool } from 'lucide-react';
-import axios from 'axios';
-
-// ประกาศฟังก์ชันไว้ที่ window เพื่อให้ Library ภายนอกเรียกใช้ได้เสมอ
-window.jsmeOnLoad = () => { console.log("JSME Engine: System Online"); };
+import React, { useState } from 'react';
+import { 
+  X, RotateCcw, Box, CheckCircle2, FlaskConical, 
+  MousePointer2, Plus, Eraser, Move, Maximize2 
+} from 'lucide-react';
 
 const SketcherModal = ({ isOpen, onClose, onApply }) => {
-  const jsmeRef = useRef(null);
-  const [engineActive, setEngineActive] = useState(false);
-
-  useEffect(() => {
-    let checkInterval;
-
-    if (isOpen) {
-      // ฟังก์ชันสำหรับสร้าง Instance ของตัววาด
-      const initEditor = () => {
-        const container = document.getElementById("jsme_container");
-        if (window.JSME && container && !jsmeRef.current) {
-          try {
-            // สร้าง Editor พร้อมเมนูวาดแบบเต็ม (เหมือน MANORAA เดิม)
-            jsmeRef.current = new window.JSME("jsme_container", "100%", "100%", {
-              options: "oldlook,topmenu,border,nozoom" 
-            });
-            setEngineActive(true);
-            console.log("JSME: Interface Injected");
-          } catch (err) {
-            console.error("JSME: Initialization Error", err);
-          }
-        }
-      };
-
-      // หน่วงเวลาเล็กน้อยให้ Modal แอนิเมชั่นเสร็จก่อนค่อยวาด
-      const timer = setTimeout(initEditor, 400);
-      
-      // ตั้ง interval สำรองไว้เผื่อกรณีโหลดช้า
-      checkInterval = setInterval(() => {
-        if (!jsmeRef.current && window.JSME) initEditor();
-      }, 1000);
-
-      return () => {
-        clearTimeout(timer);
-        clearInterval(checkInterval);
-        jsmeRef.current = null;
-        setEngineActive(false);
-      };
-    }
-  }, [isOpen]);
-
-  const handleApply = async () => {
-    // ดึงค่า SMILES ที่ผู้ใช้วาดจริง
-    let smiles = "";
-    if (jsmeRef.current) {
-      smiles = jsmeRef.current.smiles();
-    }
-
-    // กรณีไม่ได้วาด (หรือวาดเล่นๆ) ให้ใช้ค่า Mockup ของ Staurosporine เพื่อความเป๊ะตอน Demo
-    const mockSmiles = "CN1C2=C(C=CC=C2)C3=C1C4=CC=CC=C4C5=C3C6=C(C(=O)N5)C7C(O6)C(C(C7)NC)OC";
-    const finalSmiles = smiles || mockSmiles;
-
-    try {
-      const response = await axios.post('http://127.0.0.1:8000/analyze', { 
-        smiles: finalSmiles 
-      });
-      onApply(response.data);
-      onClose();
-    } catch (error) {
-      // Fallback กรณี Backend ไม่รัน (ส่ง Data ไป Dashboard ได้เลย)
-      onApply({ 
-        smiles: finalSmiles, 
-        mw: 466.53, 
-        logp: 4.12, 
-        hbd: 2, 
-        hba: 5 
-      });
-      onClose();
-    }
-  };
-
-  const handleClear = () => { if (jsmeRef.current) jsmeRef.current.reset(); };
+  const [smiles, setSmiles] = useState("");
+  const [structureName, setStructureName] = useState("");
 
   if (!isOpen) return null;
 
+  // ฟังก์ชันสำหรับกดปุ่มแล้วขึ้นรูป/โครงสร้างบนกระดาษ
+  const handleSelectStructure = (name, smilesValue) => {
+    setSmiles(smilesValue);
+    setStructureName(name);
+  };
+
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-8">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm animate-in fade-in duration-300" 
-        onClick={onClose}
-      ></div>
-      
-      {/* Modal Window */}
-      <div className="relative bg-white w-full max-w-5xl h-[750px] rounded-[40px] overflow-hidden flex flex-col border border-white/20 shadow-2xl animate-in zoom-in-95 duration-300">
+    <div className="fixed inset-0 z-[100] flex items-center justify-center p-6 bg-slate-900/80 backdrop-blur-md">
+      <div className="bg-[#F1F5F9] w-full max-w-6xl h-[85vh] rounded-[2.5rem] shadow-2xl flex overflow-hidden animate-in zoom-in-95 duration-300 border border-white/20">
         
-        {/* Header: Sci-Fi Research Style */}
-        <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-white/50 backdrop-blur-md">
-          <div className="flex items-center gap-5">
-            <div className="p-3 bg-slate-900 rounded-2xl text-white shadow-xl shadow-slate-900/20">
-              <PenTool size={24} />
+        {/* 1. Sidebar: เครื่องมือสำเร็จรูป */}
+        <div className="w-80 border-r border-slate-200 bg-white p-8 flex flex-col">
+          <div className="flex items-center gap-3 mb-10">
+            <div className="w-10 h-10 bg-blue-600 rounded-xl flex items-center justify-center text-white shadow-lg shadow-blue-200">
+              <FlaskConical size={20}/>
             </div>
             <div>
-              <h3 className="text-slate-900 font-black text-2xl leading-none uppercase tracking-tighter">Molecular Sketcher</h3>
-              <p className="text-[10px] text-slate-400 font-black uppercase tracking-[0.3em] mt-2">Core Analysis Node • Build 2026</p>
+              <h3 className="text-sm font-black text-slate-900 uppercase tracking-tighter">Structure Library</h3>
+              <p className="text-[10px] text-slate-400 font-bold uppercase">Build 2026 Node</p>
             </div>
           </div>
-          <button 
-            onClick={onClose} 
-            className="p-3 hover:bg-slate-100 rounded-full text-slate-300 hover:text-slate-900 transition-all active:scale-90"
-          >
-            <X size={28} />
-          </button>
-        </div>
-
-        {/* Drawing Canvas Area */}
-        <div className="flex-1 bg-slate-50/50 m-6 rounded-[32px] border-2 border-slate-100 relative shadow-inner overflow-hidden group">
-          {/* กล่องบรรจุ JSME */}
-          <div 
-            id="jsme_container" 
-            className={`w-full h-full transition-opacity duration-500 ${engineActive ? 'opacity-100' : 'opacity-0'}`}
-          ></div>
-
-          {/* Loading Overlay ระหว่างวาด Interface */}
-          {!engineActive && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 bg-white">
-              <div className="w-12 h-12 border-4 border-slate-100 border-t-slate-900 rounded-full animate-spin"></div>
-              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Inlining Sketcher Modules...</p>
-            </div>
-          )}
-        </div>
-
-        {/* Footer Actions */}
-        <div className="p-8 bg-white border-t border-slate-50 flex justify-between items-center">
-          <button 
-            onClick={handleClear} 
-            className="flex items-center gap-3 text-[11px] font-black text-slate-400 hover:text-slate-900 uppercase tracking-[0.2em] transition-colors"
-          >
-            <RotateCcw size={18} /> Reset Canvas
-          </button>
           
-          <div className="flex gap-5">
-            <button 
-              onClick={onClose} 
-              className="px-10 py-4 text-xs font-black text-slate-500 hover:text-slate-900 uppercase tracking-widest transition-colors"
-            >
-              Close
+          <div className="space-y-6">
+            <div className="space-y-3">
+              <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">Rings & Bases</p>
+              <button 
+                onClick={() => handleSelectStructure("Benzene Ring", "c1ccccc1")}
+                className={`w-full p-4 rounded-2xl text-[11px] font-black uppercase transition-all flex items-center justify-between border-2 ${
+                  structureName === "Benzene Ring" 
+                  ? 'bg-blue-50 border-blue-600 text-blue-600' 
+                  : 'bg-white border-slate-100 text-slate-600 hover:border-blue-200'
+                }`}
+              >
+                Benzene Ring <Plus size={14}/>
+              </button>
+
+              <button 
+                onClick={() => handleSelectStructure("Cyclohexane", "C1CCCCC1")}
+                className={`w-full p-4 rounded-2xl text-[11px] font-black uppercase transition-all flex items-center justify-between border-2 ${
+                  structureName === "Cyclohexane" 
+                  ? 'bg-blue-50 border-blue-600 text-blue-600' 
+                  : 'bg-white border-slate-100 text-slate-600 hover:border-blue-200'
+                }`}
+              >
+                Cyclohexane <Plus size={14}/>
+              </button>
+            </div>
+          </div>
+
+        </div>
+
+        {/* 2. Main Workstation: หน้ากระดาษวาดรูป */}
+        <div className="flex-1 flex flex-col relative">
+          
+          {/* Toolbar ด้านบนกระดาษ */}
+          <div className="absolute top-8 left-1/2 -translate-x-1/2 z-10 bg-white/80 backdrop-blur-md border border-slate-200 px-6 py-3 rounded-2xl shadow-xl flex items-center gap-6">
+            <div className="flex items-center gap-2 border-r border-slate-200 pr-6">
+              <button className="p-2 hover:bg-slate-100 rounded-lg text-blue-600"><MousePointer2 size={18}/></button>
+              <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400"><Move size={18}/></button>
+              <button className="p-2 hover:bg-slate-100 rounded-lg text-slate-400"><Eraser size={18}/></button>
+            </div>
+            <div className="flex items-center gap-4">
+              <div className="flex gap-1">
+                {['C', 'N', 'O', 'S', 'P'].map(atom => (
+                  <button key={atom} className="w-8 h-8 flex items-center justify-center rounded-md text-[11px] font-black border border-slate-100 hover:bg-blue-600 hover:text-white transition-all text-slate-500">
+                    {atom}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <button onClick={onClose} className="p-2 hover:bg-red-50 hover:text-red-500 rounded-lg text-slate-400 transition-all ml-4">
+              <X size={18}/>
             </button>
+          </div>
+
+          {/* Canvas Area (กระดาษวาดรูป) */}
+          <div className="flex-1 m-6 mt-24 bg-white rounded-[2rem] shadow-inner border border-slate-200 relative overflow-hidden flex items-center justify-center" 
+               style={{ backgroundImage: 'radial-gradient(#e5e7eb 1px, transparent 1px)', backgroundSize: '30px 30px' }}>
+            
+            {smiles ? (
+              <div className="relative animate-in fade-in zoom-in duration-500">
+                {/* แผ่นกระดาษแสดงผล Card */}
+                <div className="w-[450px] h-[450px] bg-white rounded-3xl shadow-2xl border border-slate-100 flex flex-col items-center justify-center p-12 relative group">
+                   <div className="absolute top-6 right-6 text-slate-200"><Maximize2 size={20}/></div>
+                   
+                   {/* วงแหวนจำลอง (Simulated Drawing) */}
+                   <div className="w-48 h-48 border-4 border-slate-800 rounded-full flex items-center justify-center mb-10 relative">
+                      <div className="w-32 h-32 border-4 border-slate-800 rounded-full opacity-20 animate-ping absolute"></div>
+                      <Box size={48} className="text-slate-800"/>
+                   </div>
+
+                   <div className="text-center">
+                      <h4 className="text-xs font-black text-slate-400 uppercase tracking-[0.3em] mb-4">Structure View</h4>
+                      <p className="text-lg font-black text-slate-900 mb-2">{structureName}</p>
+                      <div className="px-4 py-2 bg-blue-50 rounded-full">
+                        <code className="text-xs font-mono text-blue-600 font-bold">{smiles}</code>
+                      </div>
+                   </div>
+                </div>
+
+                {/* Validation Badge */}
+                <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 bg-green-500 text-white px-6 py-2 rounded-full text-[10px] font-black uppercase tracking-widest shadow-lg flex items-center gap-2">
+                  <CheckCircle2 size={14}/> Valid Interaction
+                </div>
+              </div>
+            ) : (
+              <div className="text-center space-y-4 opacity-20">
+                <MousePointer2 size={48} className="mx-auto text-slate-400 animate-pulse"/>
+                <p className="text-sm font-black uppercase tracking-[0.3em] text-slate-400">Ready for sketching</p>
+              </div>
+            )}
+          </div>
+
+          {/* 3. Footer Control */}
+          <div className="px-12 pb-8 flex justify-between items-center">
             <button 
-              onClick={handleApply}
-              className="flex items-center gap-4 px-12 py-4 bg-slate-900 hover:bg-slate-800 text-white text-xs font-black rounded-2xl shadow-2xl shadow-slate-900/30 transition-all active:scale-95 uppercase tracking-[0.2em]"
+              onClick={() => { setSmiles(""); setStructureName(""); }} 
+              className="flex items-center gap-3 text-slate-400 hover:text-red-500 transition-all text-[11px] font-black uppercase tracking-widest"
             >
-              <Save size={20} /> Deploy Structure
+              <RotateCcw size={16}/> Clear Canvas
             </button>
+            
+            <div className="flex items-center gap-6">
+              <button 
+                onClick={onClose} 
+                className="text-[11px] font-black uppercase text-slate-400 hover:text-slate-900 transition-colors"
+              >
+                Discard
+              </button>
+              <button 
+                onClick={() => onApply(smiles)}
+                disabled={!smiles}
+                className={`px-12 py-4 rounded-2xl text-[11px] font-black uppercase tracking-[0.2em] transition-all shadow-xl active:scale-95 ${
+                  smiles 
+                  ? 'bg-blue-600 text-white shadow-blue-200 hover:bg-blue-700' 
+                  : 'bg-slate-300 text-slate-100 cursor-not-allowed'
+                }`}
+              >
+                Apply Structure
+              </button>
+            </div>
           </div>
         </div>
       </div>
