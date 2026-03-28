@@ -1,12 +1,13 @@
 import React, { useState } from 'react';
-import { Outlet, useLocation, useNavigate } from 'react-router-dom'; // เพิ่ม useNavigate
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { Search, LayoutDashboard, Beaker, FileText } from 'lucide-react'; 
 import MunySidebar from './MunySidebar';
 
 const ThreePanelLayout = () => {
   const location = useLocation();
-  const navigate = useNavigate(); // สำหรับปุ่มเปลี่ยนหน้า
+  const navigate = useNavigate();
   const [isMunyOpen, setIsMunyOpen] = useState(true);
-  const [hasSearched, setHasSearched] = useState(false); // สถานะปลดล็อคหน้าอื่น
+  const [hasSearched, setHasSearched] = useState(false); 
   
   const getPageName = () => {
     switch(location.pathname) {
@@ -21,73 +22,105 @@ const ThreePanelLayout = () => {
   return (
     <div className="flex h-screen w-full bg-[#F8FAFC] text-slate-800 overflow-hidden font-sans antialiased selection:bg-blue-100 font-inter">
       
-      {/* 1. LEFT PANEL: Hierarchy & Navigation (โค้ดเดิมของคุณ) */}
-      <aside className="hidden lg:flex w-[260px] flex-col border-r border-slate-200 bg-white shadow-[4px_0_24px_rgba(0,0,0,0.02)] z-10">
-        <div className="p-6 border-b border-slate-100 flex items-center gap-2.5">
-          <div className="w-6 h-6 bg-slate-900 rounded-sm flex items-center justify-center">
-             <span className="text-[10px] text-white font-black">M</span>
+      {/* 1. LEFT PANEL: Split into Rail and Workspace */}
+      <aside className="hidden lg:flex w-[320px] border-r border-slate-200 bg-white z-10 shadow-sm">
+        
+        {/* --- PART A: LEFT SIDE RAIL (Main Navigation) --- */}
+        <nav className="w-20 flex flex-col items-center py-6 gap-6 border-r border-slate-50 bg-slate-50/50">
+          {/* Mini Logo */}
+          <div 
+            className="w-10 h-10 bg-slate-900 rounded-xl flex items-center justify-center mb-4 cursor-pointer hover:scale-105 transition-transform" 
+            onClick={() => navigate('/')}
+          >
+             <span className="text-xs text-white font-black">M</span>
           </div>
-          <h2 className="text-lg font-bold text-slate-900 tracking-tight uppercase">Manoraa</h2>
-        </div>
-        <div className="flex-1 overflow-y-auto p-5">
-          <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-5">Research Navigation</p>
-          <div className="space-y-4">
-            <div className="flex-1 overflow-y-auto p-4">
-              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-3 ml-1">Active Workspace</p>
-              <div className="space-y-1.5">
-                <div className="group cursor-pointer p-3 rounded-xl bg-blue-50 border border-blue-100 transition-all">
+          
+          <RailIcon 
+            icon={<Search size={20}/>} 
+            active={location.pathname === '/'} 
+            onClick={() => navigate('/')} 
+            label="Search" 
+          />
+          <RailIcon 
+            icon={<LayoutDashboard size={20}/>} 
+            active={location.pathname === '/dashboard'} 
+            onClick={() => navigate('/dashboard')} 
+            label="Dash" 
+          />
+          <RailIcon 
+            icon={<Beaker size={20}/>} 
+            active={location.pathname === '/lab'} 
+            onClick={() => navigate('/lab')} 
+            label="3D Lab" 
+          />
+          <RailIcon 
+            icon={<FileText size={20}/>} 
+            active={location.pathname === '/report'} 
+            onClick={() => navigate('/report')} 
+            label="Report" 
+          />
+        </nav>
+
+        {/* --- PART B: WORKSPACE PANEL (Hierarchy) --- */}
+        <div className="flex-1 flex flex-col overflow-y-auto">
+          <div className="p-6 border-b border-slate-100">
+            <h2 className="text-lg font-black text-slate-900 tracking-tighter uppercase italic">Manoraa</h2>
+            <p className="text-[10px] text-slate-400 font-bold tracking-widest mt-1 uppercase">Platform V4.0</p>
+          </div>
+
+          <div className="p-5 space-y-8">
+            <section>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4 ml-1">Active Workspace</p>
+              <div className="space-y-2">
+                {/* Structure Item 1 */}
+                <div className="group cursor-pointer p-3 rounded-xl bg-blue-50 border border-blue-100 transition-all hover:shadow-sm">
                   <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-blue-500"></div>
+                    <div className="w-2.5 h-2.5 rounded-full bg-blue-500 animate-pulse"></div>
                     <span className="text-[13px] font-bold text-blue-900">Staurosporine</span>
                   </div>
-                  <p className="text-[10px] text-blue-500 mt-1 ml-5 font-medium">PDB: 1STU • Loaded</p>
+                  <p className="text-[10px] text-blue-400 mt-1 ml-5.5 font-medium">PDB: 1STU • Loaded</p>
                 </div>
-                <div className="group cursor-pointer p-3 rounded-xl hover:bg-slate-50 border border-transparent hover:border-slate-200 transition-all">
+                {/* Structure Item 2 */}
+                <div className="group cursor-pointer p-3 rounded-xl border border-transparent hover:border-slate-200 hover:bg-slate-50 transition-all">
                   <div className="flex items-center gap-3">
-                    <div className="w-2 h-2 rounded-full bg-slate-300 group-hover:bg-slate-400"></div>
-                    <span className="text-[13px] font-bold text-slate-600 group-hover:text-slate-900">Trimethoprim</span>
+                    <div className="w-2.5 h-2.5 rounded-full bg-slate-300 group-hover:bg-slate-400"></div>
+                    <span className="text-[13px] font-bold text-slate-600 group-hover:text-slate-900 transition-colors">Trimethoprim</span>
                   </div>
-                  <p className="text-[10px] text-slate-400 mt-1 ml-5 font-medium">PDB: 2W9H • In Queue</p>
+                  <p className="text-[10px] text-slate-400 mt-1 ml-5.5 font-medium">PDB: 2W9H • In Queue</p>
                 </div>
               </div>
-              <button className="w-full mt-4 py-2 border border-dashed border-slate-200 rounded-lg text-[10px] font-bold text-slate-400 hover:text-slate-900 hover:border-slate-400 transition-all uppercase tracking-tighter">
+              <button className="w-full mt-5 py-2.5 border border-dashed border-slate-200 rounded-xl text-[10px] font-bold text-slate-400 hover:text-blue-600 hover:border-blue-200 hover:bg-blue-50 transition-all uppercase tracking-tighter">
                 + Add New Structure
               </button>
-            </div>
+            </section>
           </div>
-        </div>
-        <div className="p-5 border-t border-slate-100">
-           <div className="text-[10px] text-slate-400 font-medium uppercase tracking-tighter">System Build: v3.2.0</div>
+
+          <div className="mt-auto p-6 border-t border-slate-100 bg-slate-50/30">
+            <div className="text-[9px] text-slate-400 font-bold uppercase tracking-[0.2em]">Build v3.2.0 • 2026</div>
+          </div>
         </div>
       </aside>
 
       {/* 2. CENTER PANEL */}
       <main className="relative flex-1 flex flex-col overflow-hidden bg-[#F8FAFC]">
-        {/* --- FLOATING NAVIGATION PILL (ตรงกลางล่าง) --- */}
-        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-[40] flex items-center bg-white/60 backdrop-blur-lg border border-white/20 p-1.5 rounded-2xl shadow-[0_10px_40px_rgba(0,0,0,0.06)]">
-
-        </div>
-
-        {/* --- MINIMAL FLOATING AI BUTTON (มุมล่างขวา) --- */}
+        {/* --- FLOATING AI TOGGLE (มุมล่างขวา) --- */}
         {!isMunyOpen && (
-          <div className="absolute bottom-6 right-6 z-[100] flex items-center group">
-            <span className="mr-3 text-[10px] font-medium uppercase tracking-[0.2em] text-slate-400 opacity-0 group-hover:opacity-100 transition-all duration-500 translate-x-2 group-hover:translate-x-0 pointer-events-none">
-              Muny Assistant
+          <div className="absolute bottom-8 right-8 z-[100] flex items-center group">
+            <span className="mr-4 px-4 py-2 bg-slate-900 text-white text-[10px] font-bold rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl translate-x-2 group-hover:translate-x-0 pointer-events-none uppercase tracking-widest">
+              Open Muny AI
             </span>
             <button 
               onClick={() => setIsMunyOpen(true)} 
-              className="w-12 h-12 bg-white/40 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-sm hover:shadow-blue-100 hover:bg-white/60 transition-all duration-300 active:scale-90 group"
+              className="w-14 h-14 bg-white/40 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-lg hover:bg-white/60 transition-all duration-300 active:scale-90 group"
             >
-              <div className="w-8 h-8 bg-slate-900/90 rounded-full flex items-center justify-center text-[10px] text-white font-black shadow-md group-hover:bg-blue-600 transition-colors duration-300">
+              <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-[10px] text-white font-black shadow-lg group-hover:bg-blue-600 transition-colors">
                 M
               </div>
-              <div className="absolute inset-0 rounded-full border border-blue-400/0 group-hover:border-blue-400/20 group-hover:scale-110 transition-all duration-500"></div>
             </button>
           </div>
         )}
         
-        <div className="flex-1 overflow-y-auto pb-24">
-          {/* ส่ง context ไปให้หน้าลูกเพื่อใช้ setHasSearched(true) */}
+        <div className="flex-1 overflow-y-auto">
           <Outlet context={[hasSearched, setHasSearched]} />
         </div>
       </main>
@@ -100,9 +133,9 @@ const ThreePanelLayout = () => {
         {isMunyOpen && (
           <button 
             onClick={() => setIsMunyOpen(false)}
-            className="absolute -left-5 bottom-6 z-50 w-10 h-10 bg-white border border-slate-100 rounded-full flex items-center justify-center shadow-lg hover:text-blue-500 transition-all duration-300 active:scale-90 group"
+            className="absolute -left-6 bottom-8 z-50 w-12 h-12 bg-white border border-slate-100 rounded-full flex items-center justify-center shadow-xl hover:text-blue-500 transition-all active:scale-90 group"
           >
-             <span className="text-slate-300 group-hover:text-slate-600 transition-colors">❯</span>
+             <span className="text-slate-300 group-hover:text-slate-600 transition-colors text-lg font-light">❯</span>
           </button>
         )}
 
@@ -115,16 +148,20 @@ const ThreePanelLayout = () => {
   );
 };
 
-// Helper Component สำหรับปุ่มเมนู
-const NavButton = ({ label, active, onClick }) => (
+// Helper Component สำหรับปุ่มเมนูบน Side Rail
+const RailIcon = ({ icon, active, onClick, label, disabled }) => (
   <button 
-    onClick={onClick}
-    className={`px-5 py-2 rounded-xl text-[11px] font-bold uppercase tracking-wider transition-all duration-300
-      ${active 
-        ? 'bg-slate-900 text-white shadow-md' 
-        : 'text-slate-400 hover:text-slate-900 hover:bg-white/50'}`}
+    onClick={!disabled ? onClick : undefined}
+    className={`group relative flex flex-col items-center w-full transition-all ${disabled ? 'opacity-20 cursor-not-allowed grayscale' : 'cursor-pointer'}`}
   >
-    {label}
+    <div className={`p-3 rounded-2xl transition-all duration-300 ${active ? 'bg-white shadow-xl shadow-blue-100 text-blue-200 scale-110' : 'text-slate-400 group-hover:text-slate-900 group-hover:bg-white/50'}`}>
+      {icon}
+    </div>
+    <span className={`text-[9px] mt-2 font-black uppercase tracking-tighter transition-colors ${active ? 'text-blue-200' : 'text-slate-400 group-hover:text-slate-600'}`}>
+      {label}
+    </span>
+    {/* Active Indicator Line */}
+    {active && <div className="absolute -left-0 top-1/2 -translate-y-1/2 w-1 h-8 bg-blue-600 rounded-r-full shadow-[2px_0_8px_rgba(37,99,235,0.4)]" />}
   </button>
 );
 
