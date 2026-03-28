@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { Search, LayoutDashboard, Beaker, FileText } from 'lucide-react'; 
+import { Search, LayoutDashboard, Beaker, FileText, MessageSquare } from 'lucide-react'; 
 import MunySidebar from './MunySidebar';
+
 
 const ThreePanelLayout = () => {
   const location = useLocation();
@@ -106,17 +107,25 @@ const ThreePanelLayout = () => {
         {/* --- FLOATING AI TOGGLE (มุมล่างขวา) --- */}
         {!isMunyOpen && (
           <div className="absolute bottom-8 right-8 z-[100] flex items-center group">
+            
+            {/* 1. ข้อความ Tooltip */}
             <span className="mr-4 px-4 py-2 bg-slate-900 text-white text-[10px] font-bold rounded-xl opacity-0 group-hover:opacity-100 transition-all duration-300 shadow-2xl translate-x-2 group-hover:translate-x-0 pointer-events-none uppercase tracking-widest">
-              Open Muny AI
+              Chat with AI
             </span>
+
+            {/* 2. เอาวงแหวนสีขาวและ backdrop-blur ออก */}
             <button 
               onClick={() => setIsMunyOpen(true)} 
-              className="w-14 h-14 bg-white/40 backdrop-blur-md border border-white/20 rounded-full flex items-center justify-center shadow-lg hover:bg-white/60 transition-all duration-300 active:scale-90 group"
+              className="transition-all duration-300 active:scale-90 group"
             >
-              <div className="w-10 h-10 bg-slate-900 rounded-full flex items-center justify-center text-[10px] text-white font-black shadow-lg group-hover:bg-blue-600 transition-colors">
-                M
+              {/* 3. ปรับขนาดไอคอนปุ่มสีฟ้าเดี่ยวๆ */}
+              <div className="w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center text-white shadow-lg transition-all duration-300 opacity-60 group-hover:opacity-100 active:scale-95">
+                
+                {/* 4. ไอคอน MessageSquare (ปรับขนาดให้ใหญ่ขึ้นเล็กน้อย) */}
+                <MessageSquare size={16} /> 
               </div>
             </button>
+
           </div>
         )}
         
@@ -128,18 +137,19 @@ const ThreePanelLayout = () => {
       {/* 3. RIGHT PANEL: Muny AI Sidebar */}
       <aside 
         className={`relative flex flex-col border-l border-slate-200 bg-white transition-all duration-500 cubic-bezier(0.4, 0, 0.2, 1) z-20 
-          ${isMunyOpen ? 'w-[320px]' : 'w-0'}`}
+          ${isMunyOpen ? 'w-[320px]' : 'w-0 border-l-0'} overflow-hidden`} // 1. เพิ่ม overflow-hidden และซ่อนเส้นขอบตอนปิด
       >
         {isMunyOpen && (
           <button 
             onClick={() => setIsMunyOpen(false)}
             className="absolute -left-6 bottom-8 z-50 w-12 h-12 bg-white border border-slate-100 rounded-full flex items-center justify-center shadow-xl hover:text-blue-500 transition-all active:scale-90 group"
           >
-             <span className="text-slate-300 group-hover:text-slate-600 transition-colors text-lg font-light">❯</span>
+              <span className="text-slate-300 group-hover:text-slate-600 transition-colors text-lg font-light">❯</span>
           </button>
         )}
 
-        <div className={`min-w-[320px] h-full transition-opacity duration-300 ${isMunyOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}>
+        {/* 2. แก้ตรงนี้: ให้ min-width ทำงานเฉพาะตอนเปิดเท่านั้น */}
+        <div className={`h-full transition-opacity duration-300 ${isMunyOpen ? 'w-[320px] opacity-100' : 'w-0 opacity-0 pointer-events-none'}`}>
           <MunySidebar currentPage={getPageName() || 'general'} />
         </div>
       </aside>
