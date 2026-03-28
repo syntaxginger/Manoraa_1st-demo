@@ -245,25 +245,6 @@ const MunySidebar = ({ currentPage }) => {
           </button>
         </form>
 
-        {/* Navigation Shortcuts - Fixed & Added Report */}
-        <div className="grid grid-cols-4 gap-1 pt-2 border-t border-slate-50">
-           <button onClick={() => navigate('/')} className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-slate-50 transition-colors">
-              <Search size={14} className="text-slate-400" />
-              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Search</span>
-           </button>
-           <button onClick={() => navigate('/dashboard')} className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-slate-50 transition-colors">
-              <LayoutDashboard size={14} className="text-slate-400" />
-              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Dash</span>
-           </button>
-           <button onClick={() => navigate('/lab')} className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-slate-50 transition-colors">
-              <Beaker size={14} className="text-slate-400" />
-              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">3D Lab</span>
-           </button>
-           <button onClick={() => navigate('/report')} className="flex flex-col items-center gap-1 p-2 rounded-xl hover:bg-slate-50 transition-colors">
-              <FileText size={14} className="text-slate-400" />
-              <span className="text-[8px] font-bold text-slate-400 uppercase tracking-tighter">Report</span>
-           </button>
-        </div>
       </div>
     </div>
   );
