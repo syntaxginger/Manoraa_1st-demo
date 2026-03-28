@@ -164,10 +164,10 @@ const RailIcon = ({ icon, active, onClick, label, disabled }) => (
     onClick={!disabled ? onClick : undefined}
     className={`group relative flex flex-col items-center w-full transition-all ${disabled ? 'opacity-20 cursor-not-allowed grayscale' : 'cursor-pointer'}`}
   >
-    <div className={`p-3 rounded-2xl transition-all duration-300 ${active ? 'bg-white shadow-xl shadow-blue-100 text-blue-200 scale-110' : 'text-slate-400 group-hover:text-slate-900 group-hover:bg-white/50'}`}>
+    <div className={`p-3 rounded-2xl transition-all duration-300 ${active ? 'bg-white shadow-xl shadow-blue-100 text-blue-900 scale-110' : 'text-slate-600 group-hover:text-slate-900 group-hover:bg-white/50'}`}>
       {icon}
     </div>
-    <span className={`text-[9px] mt-2 font-black uppercase tracking-tighter transition-colors ${active ? 'text-blue-200' : 'text-slate-400 group-hover:text-slate-600'}`}>
+    <span className={`text-[9px] mt-2 font-black uppercase tracking-tighter transition-colors ${active ? 'text-blue-900' : 'text-slate-600 group-hover:text-slate-600'}`}>
       {label}
     </span>
     {/* Active Indicator Line */}
